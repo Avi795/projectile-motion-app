@@ -1,191 +1,86 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Projectile Motion Simulator by Avinash Sahu</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    input {
-      margin: 10px;
-      padding: 8px;
-      font-size: 16px;
-    }
-    canvas {
-      max-width: 100%;
-    }
-    .results {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Projectile Motion Simulator</h1>
-  <label>Initial Speed (m/s): <input id="speed" type="number" value="30" /></label>
-  <label>Launch Angle (degrees): <input id="angle" type="number" value="45" /></label>
-  <button onclick="simulate()">Simulate</button>
-
-  <canvas id="chart" width="600" height="400"></canvas>
-
-  <div class="results" id="results"></div>
-
-  <script>
-    const g = 9.81;
-    let chart;
-
-    function simulate() {
-      const speed = parseFloat(document.getElementById('speed').value);
-      const angleDeg = parseFloat(document.getElementById('angle').value);
-      const angleRad = angleDeg * Math.PI / 180;
-
-      const vx = speed * Math.cos(angleRad);
-      const vy = speed * Math.sin(angleRad);
-      const flightTime = (2 * vy) / g;
-      const maxHeight = (vy * vy) / (2 * g);
-      const range = vx * flightTime;
-
-      let xData = [], yData = [];
-      for (let t = 0; t <= flightTime; t += 0.05) {
-        let x = vx * t;
-        let y = vy * t - 0.5 * g * t * t;
-        xData.push(x);
-        yData.push(y);
-      }
-
-      if (chart) chart.destroy();
-
-      chart = new Chart(document.getElementById("chart"), {
-        type: "line",
-        data: {
-          labels: xData,
-          datasets: [{
-            label: "Projectile Path",
-            data: yData,
-            borderColor: "blue",
-            fill: false,
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: "Distance (m)" }},
-            y: { title: { display: true, text: "Height (m)" }}
-          }
-        }
-      });
-
-      document.getElementById("results").innerHTML = `
-        ⏱️ Time of Flight: ${flightTime.toFixed(2)} s<br>
-        📏 Range: ${range.toFixed(2)} m<br>
-        ⛰️ Max Height: ${maxHeight.toFixed(2)} m
-      `;
-    }
-
-    simulate(); // Run once on load
-  </script>
-</body>
-</html>
-=======
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Projectile Motion Simulator</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
-      background: #f5f5f5;
-    }
-    input {
-      margin: 10px;
-      padding: 8px;
-      font-size: 16px;
     }
     canvas {
-      max-width: 100%;
-    }
-    .results {
+      border: 1px solid #ccc;
       margin-top: 20px;
-      font-size: 18px;
+    }
+    input {
+      margin: 5px;
+      padding: 5px;
+    }
+    h2 {
+      margin-bottom: 0;
+    }
+    .author {
+      font-size: 0.9em;
+      color: gray;
+      margin-top: 2px;
     }
   </style>
 </head>
 <body>
-  <h1>Projectile Motion Simulator</h1>
-  <label>Initial Speed (m/s): <input id="speed" type="number" value="30" /></label>
-  <label>Launch Angle (degrees): <input id="angle" type="number" value="45" /></label>
-  <button onclick="simulate()">Simulate</button>
+  <h2>Projectile Motion Simulator</h2>
+  <div class="author">by Avinash Sahu</div>
 
-  <canvas id="chart" width="600" height="400"></canvas>
+  <div>
+    <label>Initial Velocity (m/s): <input type="number" id="velocity" value="50"></label><br>
+    <label>Angle (degrees): <input type="number" id="angle" value="45"></label><br>
+    <button onclick="simulate()">Simulate</button>
+  </div>
 
-  <div class="results" id="results"></div>
+  <canvas id="canvas" width="600" height="400"></canvas>
 
   <script>
-    const g = 9.81;
-    let chart;
-
     function simulate() {
-      const speed = parseFloat(document.getElementById('speed').value);
-      const angleDeg = parseFloat(document.getElementById('angle').value);
-      const angleRad = angleDeg * Math.PI / 180;
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const vx = speed * Math.cos(angleRad);
-      const vy = speed * Math.sin(angleRad);
-      const flightTime = (2 * vy) / g;
-      const maxHeight = (vy * vy) / (2 * g);
-      const range = vx * flightTime;
+      const v = parseFloat(document.getElementById('velocity').value);
+      const angle = parseFloat(document.getElementById('angle').value) * Math.PI / 180;
 
-      let xData = [], yData = [];
-      for (let t = 0; t <= flightTime; t += 0.05) {
-        let x = vx * t;
-        let y = vy * t - 0.5 * g * t * t;
-        xData.push(x);
-        yData.push(y);
+      const g = 9.8;
+      const vx = v * Math.cos(angle);
+      const vy = v * Math.sin(angle);
+
+      let x = 0;
+      let y = 0;
+      let t = 0;
+      const dt = 0.05;
+
+      const points = [];
+
+      while (y >= 0) {
+        x = vx * t;
+        y = vy * t - 0.5 * g * t * t;
+        if (y >= 0) {
+          points.push({x: x, y: canvas.height - y});
+        }
+        t += dt;
       }
 
-      if (chart) chart.destroy();
+      // Scale for canvas
+      const xScale = canvas.width / (Math.max(...points.map(p => p.x)) + 10);
+      const yScale = 1;
 
-      chart = new Chart(document.getElementById("chart"), {
-        type: "line",
-        data: {
-          labels: xData,
-          datasets: [{
-            label: "Projectile Path",
-            data: yData,
-            borderColor: "blue",
-            fill: false,
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: "Distance (m)" }},
-            y: { title: { display: true, text: "Height (m)" }}
-          }
-        }
-      });
-
-      document.getElementById("results").innerHTML = `
-        ⏱️ Time of Flight: ${flightTime.toFixed(2)} s<br>
-        📏 Range: ${range.toFixed(2)} m<br>
-        ⛰️ Max Height: ${maxHeight.toFixed(2)} m
-      `;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x * xScale, points[0].y * yScale);
+      for (const point of points) {
+        ctx.lineTo(point.x * xScale, point.y * yScale);
+      }
+      ctx.strokeStyle = "blue";
+      ctx.stroke();
     }
-
-    simulate(); // Run once on load
   </script>
 </body>
 </html>
->>>>>>> 9fab2cb0bf4ccdf4297c2591d044814502678525
