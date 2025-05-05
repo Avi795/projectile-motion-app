@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Projectile Motion Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    input {
+      margin: 10px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Projectile Motion Simulator</h1>
+  <label>Initial Speed (m/s): <input id="speed" type="number" value="30" /></label>
+  <label>Launch Angle (degrees): <input id="angle" type="number" value="45" /></label>
+  <button onclick="simulate()">Simulate</button>
+
+  <canvas id="chart" width="600" height="400"></canvas>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    const g = 9.81;
+    let chart;
+
+    function simulate() {
+      const speed = parseFloat(document.getElementById('speed').value);
+      const angleDeg = parseFloat(document.getElementById('angle').value);
+      const angleRad = angleDeg * Math.PI / 180;
+
+      const vx = speed * Math.cos(angleRad);
+      const vy = speed * Math.sin(angleRad);
+      const flightTime = (2 * vy) / g;
+      const maxHeight = (vy * vy) / (2 * g);
+      const range = vx * flightTime;
+
+      let xData = [], yData = [];
+      for (let t = 0; t <= flightTime; t += 0.05) {
+        let x = vx * t;
+        let y = vy * t - 0.5 * g * t * t;
+        xData.push(x);
+        yData.push(y);
+      }
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(document.getElementById("chart"), {
+        type: "line",
+        data: {
+          labels: xData,
+          datasets: [{
+            label: "Projectile Path",
+            data: yData,
+            borderColor: "blue",
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Distance (m)" }},
+            y: { title: { display: true, text: "Height (m)" }}
+          }
+        }
+      });
+
+      document.getElementById("results").innerHTML = `
+        ⏱️ Time of Flight: ${flightTime.toFixed(2)} s<br>
+        📏 Range: ${range.toFixed(2)} m<br>
+        ⛰️ Max Height: ${maxHeight.toFixed(2)} m
+      `;
+    }
+
+    simulate(); // Run once on load
+  </script>
+</body>
+</html>
