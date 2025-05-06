@@ -17,8 +17,15 @@
       padding: 8px;
       font-size: 16px;
     }
+    .canvas-container {
+      position: relative;
+      width: 600px;
+      margin: auto;
+    }
     canvas {
-      max-width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
     .results {
       margin-top: 20px;
@@ -40,15 +47,21 @@
   <label>Launch Angle (degrees): <input id="angle" type="number" value="45" /></label>
   <button onclick="simulate()">Simulate</button>
 
-  <canvas id="chart" width="600" height="400"></canvas>
+  <div class="canvas-container" style="height: 400px;">
+    <canvas id="chart" width="600" height="400"></canvas>
+    <canvas id="ball" width="600" height="400"></canvas>
+  </div>
 
   <div class="results" id="results"></div>
 
   <script>
     const g = 9.81;
     let chart;
+    let animationFrame;
+    let xData = [], yData = [];
 
     function simulate() {
+      cancelAnimationFrame(animationFrame); // Stop previous animation
       const speed = parseFloat(document.getElementById('speed').value);
       const angleDeg = parseFloat(document.getElementById('angle').value);
       const angleRad = angleDeg * Math.PI / 180;
@@ -59,8 +72,8 @@
       const maxHeight = (vy * vy) / (2 * g);
       const range = vx * flightTime;
 
-      let xData = [], yData = [];
-      for (let t = 0; t <= flightTime; t += 0.05) {
+      xData = [], yData = [];
+      for (let t = 0; t <= flightTime; t += 0.02) {
         let x = vx * t;
         let y = vy * t - 0.5 * g * t * t;
         xData.push(x);
@@ -68,7 +81,6 @@
       }
 
       if (chart) chart.destroy();
-
       chart = new Chart(document.getElementById("chart"), {
         type: "line",
         data: {
@@ -82,6 +94,7 @@
           }]
         },
         options: {
+          animation: false,
           scales: {
             x: { title: { display: true, text: "Distance (m)" }},
             y: { title: { display: true, text: "Height (m)" }}
@@ -94,9 +107,44 @@
         📏 Range: ${range.toFixed(2)} m<br>
         ⛰️ Max Height: ${maxHeight.toFixed(2)} m
       `;
+
+      animateBall();
     }
 
-    simulate(); // Run once on load
+    function animateBall() {
+      const canvas = document.getElementById("ball");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const maxX = Math.max(...xData);
+      const maxY = Math.max(...yData);
+
+      let index = 0;
+
+      function drawFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const x = xData[index];
+        const y = yData[index];
+
+        const px = (x / maxX) * canvas.width;
+        const py = canvas.height - (y / maxY) * canvas.height;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 8, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+
+        index++;
+        if (index < xData.length) {
+          animationFrame = requestAnimationFrame(drawFrame);
+        }
+      }
+
+      drawFrame();
+    }
+
+    simulate(); // Initial run
   </script>
 </body>
 </html>
